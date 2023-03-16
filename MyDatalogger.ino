@@ -96,10 +96,6 @@ void loop() {
       if (dataFile) {
         // If messages in Serial1
         if (Serial1.available() > 0) {
-          
-          // Turn on light to signal write in progress
-          digitalWrite(light, HIGH);
-          
           // Get line from serial
           String line = Serial1.readStringUntil('\n');
           
@@ -108,9 +104,6 @@ void loop() {
 
           // Print to Serial too
           Serial.println("\r\nWriting: " +line);
-
-          // Turn off light to signal write complete
-          digitalWrite(light, LOW);
         }
       }
       // if the file isn't open, pop up an error:
