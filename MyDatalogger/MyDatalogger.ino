@@ -2,7 +2,7 @@
   SD Serial Logger
 
   Log messages incoming on Serial1 to an SD card.
-  We use the Arduino MKR GSM 1400, but other arduinos will also work.
+  We use the Arduino UNO, but other arduinos will also work.
 
   created  Mar 16 2023
   by Jeremy Côté
@@ -10,17 +10,23 @@
 
 #include <SPI.h>
 #include <SD.h>
+#include <SoftwareSerial.h>
 
-const int chipSelect = 21;
+#define rxPin 2
+#define txPin 3
+
+// const int chipSelect = 7;
 const int logButton = 6; // Button to enable/disable logging
 const int light = 5; // Signal light
 
 File dataFile;
 bool fileMounted = false;
 
+SoftwareSerial Serial1 =  SoftwareSerial(rxPin, txPin);
+
 void setup() {
   // Setup pins
-  pinMode(chipSelect, OUTPUT);
+  // pinMode(chipSelect, OUTPUT);
   pinMode(logButton, INPUT);
   pinMode(light, OUTPUT);
 
@@ -37,7 +43,7 @@ void mount() {
   Serial.print("Initializing SD card...");
 
   // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect)) {
+  if (!SD.begin()) {
     Serial.println("Card failed, or not present");
       digitalWrite(light, LOW);
       fileMounted = false;
@@ -56,7 +62,7 @@ void mount() {
     Serial.println("Mounted file");
 
     // Create header
-    dataFile.println("id,value");
+    dataFile.println("id,value,current_sense");
     fileMounted = true;
   } else {
     Serial.println("Failed to open file");
