@@ -61,8 +61,6 @@ void mount() {
     // Successfully opened file
     Serial.println("Mounted file");
 
-    // Create header
-    dataFile.println("id,value,current_sense");
     fileMounted = true;
   } else {
     Serial.println("Failed to open file");
@@ -83,10 +81,11 @@ void unmount() {
 }
 
 String createFilename() {
-  String filename = "logs00.CSV";
-  for (uint8_t i = 0; i < 100; i++) {
-    filename[4] = i/10 + '0';
-    filename[5] = i%10 + '0';
+  String filename = "logs000.CSV";
+  for (int i = 0; i < 1000; i++) {
+    filename[4] = ((i/10) / 10) % 10 + '0';
+    filename[5] = (i/10) % 10 + '0';
+    filename[6] = i%10 + '0';
     if (! SD.exists(filename)) {
       break;  // leave the loop!
     }
