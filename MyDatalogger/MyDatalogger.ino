@@ -32,7 +32,7 @@ void setup() {
 
   // Open serial communications
   Serial.begin(115200);
-  Serial1.begin(115200);
+  Serial1.begin(57600);
 
   Serial.println("UO Supermileage Datalogger");
 }
@@ -60,7 +60,7 @@ void mount() {
   if (dataFile) {
     // Successfully opened file
     Serial.println("Mounted file");
-
+    dataFile.println("timestamp,throttle,speed,current,voltage,throttleTooHigh,motorInitializing,clockState,lastDeadman");
     fileMounted = true;
   } else {
     Serial.println("Failed to open file");
