@@ -75,7 +75,7 @@ void setup() {
 
   // Open serial communications
   Serial.begin(115200);
-  Serial2.begin(57600, SERIAL_8N1, rxPin, txPin);
+  Serial2.begin(115200, SERIAL_8N1, rxPin, txPin);
 
   Serial.println("UO Supermileage Datalogger");
 
@@ -99,11 +99,11 @@ void setup() {
 }
 
 String createFilename() {
-  String filename = "logs000.txt";
+  String filename = "/logs000.csv";
   for (int i = 0; i < 1000; i++) {
-    filename[4] = ((i/10) / 10) % 10 + '0';
-    filename[5] = (i/10) % 10 + '0';
-    filename[6] = i%10 + '0';
+    filename[5] = ((i/10) / 10) % 10 + '0';
+    filename[6] = (i/10) % 10 + '0';
+    filename[7] = i%10 + '0';
     Serial.println(filename);
     if (! SD.exists(filename)) {
       break;  // leave the loop!
@@ -135,12 +135,12 @@ void mount() {
   filename = createFilename();
 
   Serial.println("Opening file " + filename);
-  dataFile = SD.open("/" + filename, FILE_APPEND);
+  dataFile = SD.open(filename, FILE_APPEND);
         
   if (dataFile) {
     // Successfully opened file
     Serial.println("Mounted file");
-    // dataFile.println("timestamp,throttle,speed,current,voltage,throttleTooHigh,motorInitializing,clockState,lastDeadman");
+    dataFile.println("timestamp,throttle,speed,rpm,current,voltage,throttleTooHigh,motorInitializing,clockState,lastDeadman");
     fileMounted = true;
   } else {
     Serial.println("Failed to open file");
@@ -179,7 +179,7 @@ void loop() {
   }
 
   // If switch is on
-  if (digitalRead(logButton) == HIGH) {
+  if (digitalRead(logButton) == LOW) {
     
     // Mount file if not already done
     if (!fileMounted) {
@@ -194,6 +194,22 @@ void loop() {
       line.trim();
 
       Serial.println(line);
+
+      if (fileMounted) {
+        // if the file is available, write to it:
+        if (dataFile) {
+            // Write to SD Card
+            Serial.println("Writing to SD Card");
+            dataFile.println(line);  
+            dataFile.flush();
+        }
+        // if the file isn't open, pop up an error:
+        else {
+          Serial.println("error opening csv file...");
+        }
+      } else {
+        Serial.println("SD Card not mounted...");
+      }
 
       items[itemCount] = String();
       items[itemCount] += line;
@@ -250,22 +266,6 @@ void loop() {
         }
         else {
           Serial.println("WiFi Not Connected");
-        }
-
-        if (fileMounted) {
-          // if the file is available, write to it:
-          if (dataFile) {
-              // Write to SD Card
-              Serial.println("Writing to SD Card");
-              Serial.println(out);
-              dataFile.println(out);  
-          }
-          // if the file isn't open, pop up an error:
-          else {
-            Serial.println("error opening csv file...");
-          }
-        } else {
-          Serial.println("SD Card not mounted...");
         }
 
         itemCount = 0;
